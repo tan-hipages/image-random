@@ -241,10 +241,6 @@
   <body>
     <div class="card">
       <h1>Random Image Gallery</h1>
-      <p class="description">
-        Each time this page loads, it picks one random image (e.g.
-        <code>17.jpg</code>) from a numbered collection and displays it.
-      </p>
 
       <div class="image-container">
         <div class="spinner" id="spinner"></div>
@@ -257,19 +253,6 @@
       </div>
 
       <button id="reloadBtn">Show Another Image</button>
-
-      <div class="config-section">
-        <div class="config-title">Configuration</div>
-        <div class="config-item">
-          // Total images: <span id="configCount">30</span>
-        </div>
-        <div class="config-item">
-          // Folder: <span id="configFolder">""</span>
-        </div>
-        <div class="config-item">
-          // Zero padding: <span id="configPad">0</span>
-        </div>
-      </div>
     </div>
 
     <script>
@@ -281,11 +264,6 @@
 
       // Optional: zeroPad to 2 digits (e.g. 01.jpg). Set to 0 to disable.
       const zeroPad = 0;
-
-      // Update config display
-      document.getElementById("configCount").textContent = imageCount;
-      document.getElementById("configFolder").textContent = `"${cdnBaseUrl}"`;
-      document.getElementById("configPad").textContent = zeroPad;
 
       function pad(n, width) {
         if (!width) return String(n);
@@ -376,11 +354,15 @@
         img.classList.add("loading");
         img.classList.remove("loaded");
         spinner.classList.add("show");
+        nameEl.textContent = "Loading...";
 
-        // Load new image
+        // Load new image for preloading and color extraction
         const newImg = new Image();
+        newImg.crossOrigin = "anonymous"; // Enable CORS for color extraction
 
         newImg.onload = async () => {
+          // Set the displayed image src to the full CDN URL
+          img.crossOrigin = "anonymous"; // Enable CORS for color extraction
           img.src = url;
           img.alt = `Random image: ${filename}`;
           img.classList.remove("loading");
@@ -393,21 +375,25 @@
             const colors = await getImageColors(newImg);
             updateBackground(colors);
           } catch (error) {
-            console.log("Could not extract colors:", error);
+            console.log("Could not extract colors (CORS may be blocking):", error);
             // Fallback to default gradient
             document.body.style.background =
               "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
           }
         };
 
-        newImg.onerror = () => {
+        newImg.onerror = (error) => {
+          console.error("Error loading image:", url, error);
           img.alt = "Image not found: " + filename;
+          img.src = ""; // Clear broken image
           img.classList.remove("loading");
           img.classList.add("loaded");
           spinner.classList.remove("show");
           nameEl.textContent = filename + " (not found)";
         };
 
+        // Set the source to trigger loading - this will construct the full URL
+        // url is already: cdnBaseUrl + filename = "https://cdn.carloacutisteam.com/cards/1.jpg"
         newImg.src = url;
       }
 
