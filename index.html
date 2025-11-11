@@ -368,13 +368,13 @@
             // Create a new image with crossOrigin for color extraction attempt
             const colorImg = new Image();
             colorImg.crossOrigin = "anonymous";
-            
+
             await new Promise((resolve, reject) => {
               colorImg.onload = resolve;
               colorImg.onerror = reject;
               colorImg.src = url;
             });
-            
+
             const colors = await getImageColors(colorImg);
             updateBackground(colors);
           } catch (error) {
