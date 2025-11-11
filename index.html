@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Random Image Gallery</title>
+    <title>THANK GOD</title>
     <style>
       * {
         box-sizing: border-box;
@@ -356,35 +356,35 @@
         spinner.classList.add("show");
         nameEl.textContent = "Loading...";
 
-        // Load new image for preloading and color extraction
-        const newImg = new Image();
-        newImg.crossOrigin = "anonymous"; // Enable CORS for color extraction
-
-        newImg.onload = async () => {
-          // Set the displayed image src to the full CDN URL (without CORS for basic display)
-          img.src = url;
-          img.alt = `Random image: ${filename}`;
+        // Set image src directly - no CORS needed for basic image display
+        img.onload = async () => {
           img.classList.remove("loading");
           img.classList.add("loaded");
           spinner.classList.remove("show");
           nameEl.textContent = filename;
 
-          // Extract colors and update background
+          // Try to extract colors (will fail silently if CORS blocks it)
           try {
-            const colors = await getImageColors(newImg);
+            // Create a new image with crossOrigin for color extraction attempt
+            const colorImg = new Image();
+            colorImg.crossOrigin = "anonymous";
+            
+            await new Promise((resolve, reject) => {
+              colorImg.onload = resolve;
+              colorImg.onerror = reject;
+              colorImg.src = url;
+            });
+            
+            const colors = await getImageColors(colorImg);
             updateBackground(colors);
           } catch (error) {
-            console.log(
-              "Could not extract colors (CORS may be blocking):",
-              error
-            );
-            // Fallback to default gradient
+            // CORS blocked color extraction - use default gradient
             document.body.style.background =
               "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
           }
         };
 
-        newImg.onerror = (error) => {
+        img.onerror = (error) => {
           console.error("Error loading image:", url, error);
           img.alt = "Image not found: " + filename;
           img.src = ""; // Clear broken image
@@ -394,9 +394,9 @@
           nameEl.textContent = filename + " (not found)";
         };
 
-        // Set the source to trigger loading - this will construct the full URL
-        // url is already: cdnBaseUrl + filename = "https://cdn.carloacutisteam.com/cards/1.jpg"
-        newImg.src = url;
+        // Set the source to trigger loading - full CDN URL
+        img.src = url;
+        img.alt = `Random image: ${filename}`;
       }
 
       document.getElementById("reloadBtn").addEventListener("click", showImage);
