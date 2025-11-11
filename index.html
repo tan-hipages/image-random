@@ -361,8 +361,7 @@
         newImg.crossOrigin = "anonymous"; // Enable CORS for color extraction
 
         newImg.onload = async () => {
-          // Set the displayed image src to the full CDN URL
-          img.crossOrigin = "anonymous"; // Enable CORS for color extraction
+          // Set the displayed image src to the full CDN URL (without CORS for basic display)
           img.src = url;
           img.alt = `Random image: ${filename}`;
           img.classList.remove("loading");
