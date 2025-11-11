@@ -257,7 +257,7 @@
 
     <script>
       // CONFIG: set how many images you have (e.g. 30)
-      const imageCount = 30; // <-- change this number to match your collection
+      const imageCount = 3; // <-- change this number to match your collection
 
       // CDN base URL for images
       const cdnBaseUrl = "https://cdn.carloacutisteam.com/cards/";
@@ -375,7 +375,10 @@
             const colors = await getImageColors(newImg);
             updateBackground(colors);
           } catch (error) {
-            console.log("Could not extract colors (CORS may be blocking):", error);
+            console.log(
+              "Could not extract colors (CORS may be blocking):",
+              error
+            );
             // Fallback to default gradient
             document.body.style.background =
               "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
